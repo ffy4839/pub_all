@@ -17,7 +17,6 @@ def get_config(sections):
         for i in config.items(section=sections):
             data[i[0]] = i[1]
         return data
-
     else:
         config['configs'] = {}
         # config['configs']['port'] = 'com10'
@@ -30,6 +29,7 @@ def get_config(sections):
 
         with open(path + 'setConfig.ini', 'w') as f:
             config.write(f)
+
         input('创建成功')
         sys.exit()
 
@@ -49,13 +49,11 @@ def choose_port():
 
 
 BAUDRATE = int(config_data['baudrate'])  # 波特率
-
 # STARTTIME = config_data['starttime']  # 开始时间
 
 FROZEN_HOUR_TIMES = int(config_data['frozen_hour'])  # 小时冻结次数
 FROZEN_DAY_TIMES = int(config_data['frozen_day'])  # 天冻结次数
 FROZEN_MONTH_TIME = int(config_data['frozen_month'])  # 月冻结次数
-
 INTERVAL = int(config_data['interval'])              # 两次设置间隔
 
 PATH = os.getcwd() + os.path.sep + '运行记录.txt'
@@ -81,7 +79,7 @@ def timen(d='%Y-%m-%d,%H:%M:%S'):
 
 
 class ser(serial.Serial):
-    def __init__(self,port):
+    def __init__(self, port):
         super(ser, self).__init__()
         self.port = port
         self.open_ser()
@@ -388,19 +386,16 @@ class set_time():
 
 class main():
     def __init__(self):
-
         # self.addtime = addtime()
         self.timeset = set_time()
         self.times_n = 0
         self.times_sum = 0
 
     def run(self):
-
         p = threading.Thread(target=self.timeset.run, args=(FROZEN_HOUR_TIMES,
                                                             FROZEN_DAY_TIMES,
                                                             FROZEN_MONTH_TIME))
         p.start()
-
 
         # time_list = self.timeset.run(
         #     FROZEN_HOUR_TIMES,
@@ -414,7 +409,6 @@ class main():
         p.join()
         time_list = self.timeset.result
         # print(time_list)
-
         self.print_save('起始时间：{}，停止时间:{}'.format(self.parse_struct_time(
             time_list[-1]), self.parse_struct_time(time_list[0])))
 
@@ -422,7 +416,6 @@ class main():
 
         while True:
             nowtime = time.time()
-
             if len(time_list) == 0:
                 break
             get_time = time_list.pop()  # 本次设置的时间
