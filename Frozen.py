@@ -81,7 +81,7 @@ def timen(d='%Y-%m-%d,%H:%M:%S'):
 
 
 class ser(serial.Serial):
-    def __init__(self,port):
+    def __init__(self, port):
         super(ser, self).__init__()
         self.port = port
         self.open_ser()
@@ -100,7 +100,10 @@ class ser(serial.Serial):
                 self.flushOutput()
                 self.write(data)
             except Exception as e:
-                print('{};{},串口发送错误'.format(timen(), e))
+                err = '{};{},串口发送错误'.format(timen(), e)
+                print(err)
+                save(err)
+                time.sleep(10)
                 quit()
         else:
             self.open_ser()
@@ -252,7 +255,7 @@ class setTimeList():
 
                 elif '022823' + self.set_struct in get_time:
                     # print(set_time_list)
-                    if '022923'+ self.set_struct not in set_time_list[-1]:
+                    if '022923' + self.set_struct not in set_time_list[-1]:
                         set_time_list.append(get_time)
                         tm -= 1
 
@@ -538,7 +541,6 @@ class main():
         # xxx = time.time()
         p.start()
 
-
         # time_list = self.timeset.run(
         #     FROZEN_HOUR_TIMES,
         #     FROZEN_DAY_TIMES,
@@ -552,8 +554,9 @@ class main():
         # print(time.time()-xxx)
         time_list = self.timeset.result
 
-        ?print(time_list)
-        self.print_save('起始时间：{}，停止时间:{}'.format(self.parse_struct_time(
+        # print(time_list)
+
+        self.print_save('\n起始时间：{}，停止时间:{}\n'.format(self.parse_struct_time(
             time_list[-1]), self.parse_struct_time(time_list[0])))
 
         lasttime = 0
@@ -639,8 +642,8 @@ class main():
 
 
 if __name__ == '__main__':
-    # try:
-    m = main()
-    m.run()
-# except Exception as e:
-#     print(e)
+    try:
+        m = main()
+        m.run()
+    except Exception as e:
+        print(e)
