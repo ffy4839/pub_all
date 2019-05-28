@@ -72,7 +72,7 @@ def save(data):
 
 
 def quit():
-    input('按任意键退出退出')
+    input('按任意键退出')
     sys.exit()
 
 
