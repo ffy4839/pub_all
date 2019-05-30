@@ -81,7 +81,7 @@ def timen(d='%Y-%m-%d,%H:%M:%S'):
 
 
 class ser(serial.Serial):
-    def __init__(self, port):
+    def __init__(self,port):
         super(ser, self).__init__()
         self.port = port
         self.open_ser()
@@ -100,10 +100,7 @@ class ser(serial.Serial):
                 self.flushOutput()
                 self.write(data)
             except Exception as e:
-                err = '{};{},串口发送错误'.format(timen(), e)
-                print(err)
-                save(err)
-                time.sleep(10)
+                print('{};{},串口发送错误'.format(timen(), e))
                 quit()
         else:
             self.open_ser()
@@ -224,13 +221,13 @@ class setTimeList():
         self.creat_formerly_time_list(15)
 
         time_list = self.last_time_list
-        if th != 0:
+        if th:
             while True:
                 if th == 0:
                     break
                 set_time_list.append(time_list.pop())
                 th -= 1
-        if td != 0:
+        if td:
             while True:
                 if td == 0:
                     break
@@ -238,66 +235,79 @@ class setTimeList():
                 if '23' + self.set_struct in get_time:
                     set_time_list.append(get_time)
                     td -= 1
-        if tm != 0:
+        if tm:
             while True:
                 if tm == 0:
                     break
                 # print(len(time_list),tm)
                 get_time = time_list.pop()
+
+
+                get_time_y = '20'+get_time[0:2]
+                get_time_mdh = get_time[2:8]
+                mdh_list = ('013123','022823','033123','043023','053123','063023','073123','083123','093023','103123','113023','123123')
+                mdh_list_1 = ('013123','022923','033123','043023','053123','063023','073123','083123','093023','103123','113023','123123')
+                if not int(get_time_y) % 4 and int(get_time_y) % 100 or not int(get_time_y) % 400:
+                    mdh_list = mdh_list_1
+                if get_time_mdh in mdh_list:
+                    set_time_list.append(get_time)
+                    tm-=1
+
+
                 # print(get_time)
-                if '013123' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # if '013123' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '022923' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '022923' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '022823' + self.set_struct in get_time:
-                    # print(set_time_list)
-                    if '022923' + self.set_struct not in set_time_list[-1]:
-                        set_time_list.append(get_time)
-                        tm -= 1
+                # elif '022823' + self.set_struct in get_time:
+                #     # print(set_time_list)
+                #     if '022923'+ self.set_struct not in set_time_list[-1]:
+                #         set_time_list.append(get_time)
+                #         tm -= 1
 
-                elif '033123' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '033123' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '043023' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '043023' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '053123' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '053123' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '063023' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '063023' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '073123' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '073123' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '083123' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '083123' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '093023' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '093023' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '103123' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '103123' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '113023' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '113023' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
 
-                elif '123123' + self.set_struct in get_time:
-                    set_time_list.append(get_time)
-                    tm -= 1
+                # elif '123123' + self.set_struct in get_time:
+                #     set_time_list.append(get_time)
+                #     tm -= 1
         self.result = set_time_list
         return set_time_list
 
@@ -541,6 +551,7 @@ class main():
         # xxx = time.time()
         p.start()
 
+
         # time_list = self.timeset.run(
         #     FROZEN_HOUR_TIMES,
         #     FROZEN_DAY_TIMES,
@@ -554,7 +565,7 @@ class main():
         # print(time.time()-xxx)
         time_list = self.timeset.result
 
-        # print(time_list)
+        #print(time_list)
 
         self.print_save('\n起始时间：{}，停止时间:{}\n'.format(self.parse_struct_time(
             time_list[-1]), self.parse_struct_time(time_list[0])))
@@ -606,7 +617,7 @@ class main():
 
     def shengyushijian(self, data, nowtime, lasttime):
         if lasttime == 0:
-            return self.parse_time(data * 21)
+            return self.parse_time(data * INTERVAL)
         times = nowtime - lasttime
         self.times_sum += times
         self.times_n += 1
@@ -642,8 +653,8 @@ class main():
 
 
 if __name__ == '__main__':
-    try:
-        m = main()
-        m.run()
-    except Exception as e:
-        print(e)
+    # try:
+    m = main()
+    m.run()
+# except Exception as e:
+#     print(e)
