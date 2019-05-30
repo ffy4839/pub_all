@@ -653,8 +653,8 @@ class main():
 
 
 if __name__ == '__main__':
-    # try:
-    m = main()
-    m.run()
-# except Exception as e:
-#     print(e)
+    try:
+        m = main()
+        m.run()
+    except Exception as e:
+        print(e)
