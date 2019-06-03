@@ -38,14 +38,11 @@ config_data = get_config('configs')
 
 
 def choose_port():
-    portin = input('输入端口号（不输入为配置文件端口号）：')
-    pp = []
-    for i in range(1, 21):
-        pp.append('com{}'.format(i))
-    if portin in pp:
+    portin = input('输入端口号：')
+    if portin in list(map(lambda x: 'com{}'.format(x), range(1, 21))):
         return portin
     else:
-        return config_data['port']
+        choose_port()
 
 
 BAUDRATE = int(config_data['baudrate'])  # 波特率
