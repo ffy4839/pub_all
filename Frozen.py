@@ -20,13 +20,12 @@ def get_config(sections):
 
     else:
         config['configs'] = {}
-        # config['configs']['port'] = 'com10'
         config['configs']['baudrate'] = '9600'
-        # config['configs']['starttime'] = '190101005955'
         config['configs']['frozen_hour'] = '24'
         config['configs']['frozen_day'] = '3'
         config['configs']['frozen_month'] = '2'
         config['configs']['interval'] = '20'
+        config['configs']['month_frozen_day'] = 'false'
 
         with open(path + 'setConfig.ini', 'w') as f:
             config.write(f)
@@ -36,27 +35,26 @@ def get_config(sections):
 
 config_data = get_config('configs')
 
-
-def choose_port():
-    portin = input('输入端口号：')
-    if portin in list(map(lambda x: 'com{}'.format(x), range(1, 21))):
-        return portin
-    else:
-        choose_port()
-
-
 BAUDRATE = int(config_data['baudrate'])  # 波特率
-
-# STARTTIME = config_data['starttime']  # 开始时间
 
 FROZEN_HOUR_TIMES = int(config_data['frozen_hour'])  # 小时冻结次数
 FROZEN_DAY_TIMES = int(config_data['frozen_day'])  # 天冻结次数
 FROZEN_MONTH_TIME = int(config_data['frozen_month'])  # 月冻结次数
 
 INTERVAL = int(config_data['interval'])              # 两次设置间隔
+MONTH_FROZEN_DAY = config_data['month_frozen_day']   # 月冻结时间
 
 PATH = os.getcwd() + os.path.sep + '运行记录.txt'
 
+def choose_port():
+    portin = input('输入端口号（不输入为配置文件端口号）：').lower()
+    pp = []
+    for i in range(1, 21):
+        pp.append('com{}'.format(i))
+    if portin in pp:
+        return portin
+    else:
+        return config_data['port'].lower()
 
 def save(data):
     '''数据存储'''
@@ -238,75 +236,35 @@ class setTimeList():
                     break
                 # print(len(time_list),tm)
                 get_time = time_list.pop()
-
-
-                get_time_y = '20'+get_time[0:2]
                 get_time_mdh = get_time[2:8]
-                mdh_list = ('013123','022823','033123','043023','053123','063023','073123','083123','093023','103123','113023','123123')
-                mdh_list_1 = ('013123','022923','033123','043023','053123','063023','073123','083123','093023','103123','113023','123123')
-                if not int(get_time_y) % 4 and int(get_time_y) % 100 or not int(get_time_y) % 400:
-                    mdh_list = mdh_list_1
+                get_time_y = '20' + get_time[0:2]
+
+                mdh_list =self.deal_with_month_frozen(get_time_y)
+
                 if get_time_mdh in mdh_list:
                     set_time_list.append(get_time)
                     tm-=1
 
-
-                # print(get_time)
-                # if '013123' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '022923' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '022823' + self.set_struct in get_time:
-                #     # print(set_time_list)
-                #     if '022923'+ self.set_struct not in set_time_list[-1]:
-                #         set_time_list.append(get_time)
-                #         tm -= 1
-
-                # elif '033123' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '043023' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '053123' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '063023' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '073123' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '083123' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '093023' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '103123' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '113023' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
-
-                # elif '123123' + self.set_struct in get_time:
-                #     set_time_list.append(get_time)
-                #     tm -= 1
         self.result = set_time_list
         return set_time_list
+
+    def deal_with_month_frozen(self,mtime):
+        frozen_day = MONTH_FROZEN_DAY
+        if frozen_day == '' or frozen_day == 'false' or len(frozen_day) != 6:
+            mdh_list = ('013123','022823','033123','043023','053123','063023','073123','083123','093023','103123','113023','123123')
+            mdh_list_1 = ('013123','022923','033123','043023','053123','063023','073123','083123','093023','103123','113023','123123')
+            if not int(mtime) % 4 and int(mtime) % 100 or not int(mtime) % 400:
+                mdh_list = mdh_list_1
+        else:
+            mdh_list = []
+            str_frozen = timen('%y%m') + frozen_day + '00'
+            stamp_frozen = self.str_time2stamp_time(str_frozen) - 5
+            str_frozen_last = self.stamp_time2str_time(stamp_frozen,'%d')
+            for i in range(1,13):
+                add_data = str(i).rjust(2,'0') + str_frozen_last + '23'
+                mdh_list.append(add_data)
+        return mdh_list
+
 
     def creat_formerly_time_list(self, years=12):
         # 创建12年零点
@@ -342,195 +300,6 @@ class setTimeList():
     def get_now_time(self, struct='%y%m%d%H%M%S'):
         return time.strftime(struct, time.localtime(time.time()))
 
-    # def test(self):
-    #     #     test_list = []
-    #     #     for i in range(20):
-    #     #         xx = (random.randint(0, 1000), random.randint(0, 100), random.randint(0, 100))
-    #     #         test_list.append(xx)
-    #     #     for test in test_list:
-    #     #         sum = 0
-    #     #         for i in test:
-    #     #             sum += i
-    #     #         res = self.run(test[0], test[1], test[2])
-    #     #         print(len(res), sum)
-    #     #         # print()
-    #     #         if len(res) == sum:
-    #     #             print('OK')
-
-# class set_time():
-#     def __init__(self):
-#         self.time_list = []
-#
-#     def run(self, hs, ds, ms):
-#         # print('线程1')
-#         self.add_timeList()
-#         x = self.time_list
-#         t = []
-#         for y in x:
-#             for m in y:
-#                 for d in m:
-#                     for h in d:
-#                         if len(t) > hs or hs == 0:
-#                             break
-#                         t.append(h)
-#                     if len(t) > hs + ds or hs + ds == 0:
-#                         break
-#                     if len(t) > hs:
-#                         t.append(d[0])
-#                 if len(t) > ms + hs + ds:
-#                     break
-#                 if len(t) > hs + ds:
-#                     t.append(m[0][0])
-#             if len(t) > ms + hs + ds:
-#                 break
-#         # print(len(t), (ms + ds + hs))
-#         # print(t)
-#         self.result = t
-#         # print('shijinalianbiao chansheng ')
-#         return t
-#
-#     def get_structtime(self, d):
-#         return time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(d, '%y%m%d%H%M%S'))
-#
-#     def add_timeList(self):
-#         start_time = self.get_nowtime()
-#         end_time = str(int(self.get_year(start_time)) -
-#                        11).zfill(2) + start_time[2:]
-#         next_time = start_time
-#         # print('起始时间：{}，停止时间:{}'.format(self.get_structtime(
-#         #     end_time), self.get_structtime(start_time)))
-#
-#         self.time_list = []
-#
-#         y = self.get_year(next_time)
-#         m = self.get_month(next_time)
-#         d = self.get_day(next_time)
-#
-#         while True:
-#             if next_time == end_time:
-#                 break
-#             y0 = y
-#             years = []
-#             while True:
-#                 if next_time == end_time:
-#                     break
-#                 if y != y0:
-#                     break
-#                 m0 = m
-#                 months = []
-#                 while True:
-#                     if next_time == end_time:
-#                         break
-#                     if m != m0:
-#                         break
-#                     d0 = d
-#                     days = []
-#                     while True:
-#                         if next_time == end_time:
-#                             break
-#                         if d != d0:
-#                             break
-#                         days.append(next_time)
-#                         d0 = d
-#                         m0 = m
-#                         y0 = y
-#                         next_time = self.reduce_hour(next_time)
-#                         y = self.get_year(next_time)
-#                         m = self.get_month(next_time)
-#                         d = self.get_day(next_time)
-#                     months.append(days)
-#
-#                 years.append(months)
-#             self.time_list.append(years)
-#
-#     def reduce_hour(self, struct_time):
-#         return time.strftime('%y%m%d%H%M%S', time.localtime(
-#             time.mktime(time.strptime(struct_time, '%y%m%d%H%M%S')) - 3600))
-#
-#     def get_nowtime(self,):
-#         str_time = time.strftime(
-#             '%y%m%d', time.localtime(time.time())) + '005955'
-#         return str_time
-#
-#     def get_year(self, str_time):
-#         return str_time[0:2]
-#
-#     def get_day(self, str_time):
-#         return str_time[4:6]
-#
-#     def get_month(self, str_time):
-#         return str_time[2:4]
-
-# class addtime():
-#     def __init__(self):
-#         self._frozenType = 'hour'
-#
-#     def changeType(self, inset):
-#         dict_type = ['hour','day','month','h','d','m']
-#         if inset in dict_type:
-#             self._frozenType = inset
-#
-#     def run(self, addtime):
-#         type_all = {
-#             'day': self.add_day,
-#             'hour': self.add_hour,
-#             'month': self.add_month,
-#             'h':self.add_hour,
-#             'd':self.add_day,
-#             'm':self.add_month
-#         }
-#         return type_all[self._frozenType](addtime)
-#
-#     def add_day(self,addtime):
-#
-#         if len(addtime) == 14:
-#             d = '%Y%m%d%H%M%S'
-#         else:
-#             d = '%y%m%d%H%M%S'
-#         t = time.mktime(time.strptime(addtime, d))
-#         return time.strftime(d, time.localtime(t + 24 * 3600))
-#
-#     def add_hour(self,addtime):
-#
-#         if len(addtime) == 14:
-#             d = '%Y%m%d%H%M%S'
-#         else:
-#             d = '%y%m%d%H%M%S'
-#         t = time.mktime(time.strptime(addtime, d))
-#         return time.strftime(d, time.localtime(t + 3600))
-#
-#     def add_month(self,addtime):
-#
-#         if len(addtime) == 12:
-#             # d = '%y%m%d%H%M%S'
-#             # t = time.mktime(time.strptime(addtime, '%y%m%d%H%M%S'))
-#             ty = int('20' + addtime[0:2])
-#             tm = int(addtime[2:4])
-#         elif len(addtime) == 14:
-#             # d = '%Y%m%d%H%M%S'
-#             # t = time.mktime(time.strptime(addtime, '%Y%m%d%H%M%S'))
-#             ty = int(addtime[0:4])
-#             tm = int(addtime[4:6])
-#         else:
-#             return None
-#         if not int(ty) % 4 and int(ty) % 100 or not int(ty) % 400:
-#             month_list = [0, 31, 29, 31, 30, 31,
-#                           30, 31, 31, 30, 31, 30, 31, 31]
-#         else:
-#             month_list = [0, 31, 28, 31, 30, 31,
-#                           30, 31, 31, 30, 31, 30, 31, 31]
-#         for i in range(len(month_list)):
-#             month_list[i] = str(month_list[i])
-#
-#         tm+=1
-#         if tm == 13:
-#             tm = 1
-#             ty+=1
-#
-#         dd = '{}{}{}{}'.format(str(ty).zfill(2),str(tm).zfill(2),month_list[tm],'235955')
-#
-#         return dd
-
 
 class main():
     def __init__(self):
@@ -545,15 +314,8 @@ class main():
         p = threading.Thread(target=self.timeset.run, args=(FROZEN_HOUR_TIMES,
                                                             FROZEN_DAY_TIMES,
                                                             FROZEN_MONTH_TIME))
-        # xxx = time.time()
+
         p.start()
-
-
-        # time_list = self.timeset.run(
-        #     FROZEN_HOUR_TIMES,
-        #     FROZEN_DAY_TIMES,
-        #     FROZEN_MONTH_TIME
-        # )
         PORT = choose_port()  # 串口
         self.ser = ser(PORT)
         self.pro = pro()
@@ -636,13 +398,7 @@ class main():
 
     def wait_recv(self):
         recv = ''
-        # for i in range(5):
         data = self.ser.recv()
-        #     if data:
-        #         recv = '{}{}\n'.format(recv, data)
-        #     time.sleep(1)
-        # if not recv:
-        #     recv = '无接收'
         recv = '[{}], 接收: {}\n'.format(timen(), data)
         print(recv)
         save(recv)
@@ -655,3 +411,4 @@ if __name__ == '__main__':
         m.run()
     except Exception as e:
         print(e)
+        time.sleep(60)
