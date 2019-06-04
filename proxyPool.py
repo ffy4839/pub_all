@@ -65,15 +65,15 @@ class get_IP():
             ip = lxml_res.xpath(res_com.format('IP'))
             port = lxml_res.xpath(res_com.format('PORT'))
             last_time = lxml_res.xpath(res_com.format('最后验证时间'))
-            c = zip(ip, port, last_time)
-            tuple_c = []
-            for i in c:
-                times = str(int(time.mktime(time.strptime(i[2], '%Y-%m-%d %H:%M:%S'))))
-                tuple_c.append('{},{}:{}'.format(times,i[0], i[1]))
-            tuple_c = set(tuple_c)
+
+            func = lambda i:'{},{}:{}'.format(str(int(time.mktime(time.strptime(i[2], '%Y-%m-%d %H:%M:%S')))),i[0], i[1])
+            tuple_c = list(set([func(i) for i in zip(ip, port, last_time)]))
+
             for key in tuple_c:
-                save_data('{}\n'.format(key))
+                save_data(key+'\n')
+
             print('{} got it: {}'.format(get_time(),url))
+
         else:
             print('Err  {}'.format(url))
 

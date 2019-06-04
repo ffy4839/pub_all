@@ -50,24 +50,20 @@ PATH = os.getcwd() + os.path.sep + '运行记录.txt'
 def choose_port():
     s = lambda x:str(x).split('-')[0].strip(' ').upper()
     pl = list(LP.comports())
+
     port_list = [s(i) for i in pl]
     nb_port_list = [s(i)[3:] for i in pl]
-    # print(nb_port_list)
+
     port_in = input('{}\n输入端口号：'.format(str(port_list)[1:-1].replace("'",''))).upper()
-    # st = lambda x:'com{}'.format(x)
-    # if portin in [st(i) for i in range(1,21)]:
-    #     return portin
-    # else:
-    #     print('串口输入错误，请重新输入')
-    #     choose_port()
 
     if port_in in port_list:
         return port_in
+
     elif port_in in nb_port_list:
         return 'com' + port_in
+
     else:
-        print('串口输入错误，请重新输入')
-        choose_port()
+        print('串口输入错误，请重新输入\n')
 
 def save(data):
     '''数据存储'''
@@ -321,6 +317,8 @@ class main():
         self.timeset = setTimeList()
         self.times_n = 0
         self.times_sum = 0
+        self.send_time = time.time()
+        self.recv_time = time.time()
 
     def run(self):
 
@@ -329,14 +327,17 @@ class main():
                                                             FROZEN_MONTH_TIME))
 
         p.start()
-        PORT = choose_port()  # 串口
+        while True:
+            PORT = choose_port()  # 串口
+            if PORT:
+                break
         self.ser = ser(PORT)
         self.pro = pro()
 
         p.join()
         # print(time.time()-xxx)
         time_list = self.timeset.result
-        print(len(time_list))
+        # print(len(time_list))
         #print(time_list)
 
         self.print_save('\n起始时间：{}，停止时间:{}\n'.format(self.parse_struct_time(
@@ -359,6 +360,7 @@ class main():
             lasttime = nowtime
 
             self.print_data(ll, p_get_time, sysj, data)  # 打印存储数据
+            self.send_time = time.time()
             self.wait_recv()  # 等待接收
 
         print('运行结束')
@@ -415,8 +417,8 @@ class main():
         recv = '[{}], 接收: {}\n'.format(timen(), data)
         print(recv)
         save(recv)
-        time.sleep(INTERVAL - 5)
-
+        self.recv_time = time.time()
+        time.sleep(INTERVAL - (self.recv_time - self.send_time))
 
 if __name__ == '__main__':
     try:
