@@ -48,17 +48,23 @@ MONTH_FROZEN_DAY = config_data['month_frozen_day']   # 月冻结时间
 PATH = os.getcwd() + os.path.sep + '运行记录.txt'
 
 def choose_port():
-    port_in = input('输入端口号：').lower()
+    s = lambda x:str(x).split('-')[0].strip(' ').upper()
+    pl = list(LP.comports())
+    port_list = [s(i) for i in pl]
+    nb_port_list = [s(i)[3:] for i in pl]
+    # print(nb_port_list)
+    port_in = input('{}\n输入端口号：'.format(str(port_list)[1:-1].replace("'",''))).upper()
     # st = lambda x:'com{}'.format(x)
     # if portin in [st(i) for i in range(1,21)]:
     #     return portin
     # else:
     #     print('串口输入错误，请重新输入')
     #     choose_port()
-    s = lambda x:str(x).split('-')[0].strip(' ').lower()
-    port_list = [s(i) for i in list(LP.comports())]
+
     if port_in in port_list:
         return port_in
+    elif port_in in nb_port_list:
+        return 'com' + port_in
     else:
         print('串口输入错误，请重新输入')
         choose_port()

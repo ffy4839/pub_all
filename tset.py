@@ -14,6 +14,4 @@ for i in range(1, 21):
 
 
 def st(x): return 'com{}'.format(x)
-
-
 print([st(i) for i in range(1, 21)])
