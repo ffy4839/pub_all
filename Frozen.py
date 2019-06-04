@@ -6,6 +6,7 @@ import sys
 import re
 import time
 import threading
+import serial.tools.list_ports as LP
 
 
 def get_config(sections):
@@ -47,14 +48,20 @@ MONTH_FROZEN_DAY = config_data['month_frozen_day']   # 月冻结时间
 PATH = os.getcwd() + os.path.sep + '运行记录.txt'
 
 def choose_port():
-    portin = input('输入端口号（不输入为配置文件端口号）：').lower()
-    pp = []
-    for i in range(1, 21):
-        pp.append('com{}'.format(i))
-    if portin in pp:
-        return portin
+    port_in = input('输入端口号：').lower()
+    # st = lambda x:'com{}'.format(x)
+    # if portin in [st(i) for i in range(1,21)]:
+    #     return portin
+    # else:
+    #     print('串口输入错误，请重新输入')
+    #     choose_port()
+    s = lambda x:str(x).split('-')[0].strip(' ').lower()
+    port_list = [s(i) for i in list(LP.comports())]
+    if port_in in port_list:
+        return port_in
     else:
-        return config_data['port'].lower()
+        print('串口输入错误，请重新输入')
+        choose_port()
 
 def save(data):
     '''数据存储'''
@@ -323,7 +330,7 @@ class main():
         p.join()
         # print(time.time()-xxx)
         time_list = self.timeset.result
-
+        print(len(time_list))
         #print(time_list)
 
         self.print_save('\n起始时间：{}，停止时间:{}\n'.format(self.parse_struct_time(
