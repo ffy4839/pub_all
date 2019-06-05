@@ -4,27 +4,39 @@ import time
 import os
 from fake_useragent import UserAgent
 from lxml import etree
+import random
+from multiprocessing import Pool
 
+MAX = 100
+MIN = 0
 
-PATH = os.getcwd() + os.path.sep
+PATH = os.getcwd() + os.path.sep + 'proxyPool.txt'
 UA = UserAgent()
+RETRY = 3
 
-class save():
+
+class ProxyTxt():
     def __init__(self):
         pass
 
-    def save_proxy(self, data, mod='txt'):
-        pass
+    def write_line(self, data, mode='a'):
+        with open(PATH,mode) as f:
+            f.write(data+'\n')
 
-    def txt_mod(self, data):
-        pass
+    def read_all(self, mode='r'):
+        with open(PATH, mode) as f:
+            if f.readable():
+                return f.read().strip('\n')
 
 
-
-
-class craw():
+class ProxyGet():
     def __init__(self):
-       self.url_list = []
+        self.url_list = []
+        self.Err_url_list = []
+        self.get_urls()
+
+    def run(self):
+        pass
 
     def get_proxy(self,data):
         data = data.split(';')
@@ -33,16 +45,16 @@ class craw():
         headers = {
             'User-Agent': UA.random
         }
-        try:
-            re = requests.get(url,headers)
-            if re.status_code == 200:
-                return eval(parse)(re)
+        for i in range(RETRY):
+            try:
+                time.sleep(random.randint(10,30)*0.1)
+                re = requests.get(url,headers)
+                if re.status_code == 200:
+                    return eval(parse)(re)
 
-        except Exception as e:
-            print(e,'\n',url)
-
-        
-
+            except Exception as e:
+                self.Err_url_list.append(data)
+                print(e,'\n',url)
 
     def get_urls(self, pages=5):
         base_url = {
@@ -55,7 +67,73 @@ class craw():
 
     def crawl_kuaidaili(self, response):
         result = etree.HTML(response.text)
-        com = ''
-        ip =
-        port =
+        com = '//*[@id="list"]/table/tbody/tr/td[@data-title = "{}"]/text()'
+        ip = result.xpath(com.format('IP'))
+        port = result.xpath(com.format('PORT'))
         ipport = zip(ip, port)
+        func = lambda x:'10;{}:{}'.format(x[0],x[1])
+        return [func(i) for i in ipport]
+
+
+class ProxyUpdata():
+    def __init__(self):
+        self.url_list = []
+        self.over_list = []
+        self.txt = ProxyTxt()
+
+    def run(self):
+        if not self.url_list:
+            self.get_url_list()
+        self.del_removel()
+        # pool = Pool(10)
+        # p = pool.map(self.try_get,self.url_list)
+        # p.close()
+        # p.join()
+        # for i in self.over_list:
+        #     self.txt.write_line(i)
+
+    def del_removel(self):
+        func = lambda x:(x.split(';')[1],x.split(';')[0])
+        data_dir = dict([func(x) for x in self.url_list])
+
+        func = lambda x:x.split(';')[1]
+        data_list_deled = list(set([func(x) for x in self.url_list]))
+
+        for i in data_list_deled:
+            self.url_list
+
+
+    def get_url_list(self):
+        data = self.txt.read_all()
+        self.url_list = data.split('\n')
+
+    def try_get(self,data,url='https://httpbin.org/get'):
+        num = int(data.split(';')[0])
+        ipport = data.split(';')[1]
+        proxies = {
+            'http':ipport,
+            'https':ipport,
+        }
+        try:
+            time.sleep(random.randint(10, 50) * 0.1)
+            res = requests.get(url=url, proxies=proxies)
+            if res.status_code == 200:
+                data = json.loads(res.text)
+                recv_ip = data['origin'].split(',')[0]
+                send_ip = ipport.split(':')[0]
+                print(recv_ip, send_ip)
+                if send_ip == recv_ip:
+                    if num != MAX:
+                        num += 1
+
+        except Exception as e:
+            if num != 0:
+                num-=1
+            print(e, ipport)
+        self.over_list.append('{};{}'.format(str(num), data.split(';')[1]))
+
+
+
+if __name__ == '__main__':
+    up = ProxyUpdata()
+    up.run()
