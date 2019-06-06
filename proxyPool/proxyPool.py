@@ -18,10 +18,19 @@ PAGES = 5
 
 class main():
     def __init__(self):
-        pass
+        self.txt = ProxyTxt()
+        self.get = ProxyGet()
+        self.updata = ProxyUpdata()
 
     def run(self):
         pass
+
+
+    def save_get_proxy(self,data):
+        data = self.del_removel(data)
+        for i in data:
+            self.txt.write_line(i)
+
 
     def check_isfile(self):
         if os.path.exists(PATH):
