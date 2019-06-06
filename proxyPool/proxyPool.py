@@ -13,6 +13,30 @@ MIN = 0
 PATH = os.getcwd() + os.path.sep + 'proxyPool.txt'
 UA = UserAgent()
 RETRY = 3
+PAGES = 5
+
+
+class main():
+    def __init__(self):
+        pass
+
+    def run(self):
+        pass
+
+    def check_isfile(self):
+        if os.path.exists(PATH):
+            if os.path.isfile(PATH):
+                return True
+
+    def del_removel(self, data):
+        data = data.strip('\n').split('\n')
+        func = lambda x:int(x.split(';')[0])
+        data = list(set(data.sort(data,key=func,reverse=True)))
+        data_ip = [i.split(';')[1] for i in data]
+        # data_nums = [i.split(';')[0] for i in data]
+        nums = [data_ip.index(i) for i in list(set(data_ip))]
+        return [data[i] for i in nums]
+
 
 
 class ProxyTxt():
@@ -45,16 +69,18 @@ class ProxyGet():
         headers = {
             'User-Agent': UA.random
         }
-        for i in range(RETRY):
+        n = RETRY
+        while n:
             try:
                 time.sleep(random.randint(10,30)*0.1)
                 re = requests.get(url,headers)
                 if re.status_code == 200:
                     return eval(parse)(re)
-
             except Exception as e:
                 self.Err_url_list.append(data)
                 print(e,'\n',url)
+            finally:
+                n-=1
 
     def get_urls(self, pages=5):
         base_url = {
@@ -84,23 +110,12 @@ class ProxyUpdata():
     def run(self):
         if not self.url_list:
             self.get_url_list()
-        self.del_removel()
         # pool = Pool(10)
         # p = pool.map(self.try_get,self.url_list)
         # p.close()
         # p.join()
         # for i in self.over_list:
         #     self.txt.write_line(i)
-
-    def del_removel(self):
-        func = lambda x:(x.split(';')[1],x.split(';')[0])
-        data_dir = dict([func(x) for x in self.url_list])
-
-        func = lambda x:x.split(';')[1]
-        data_list_deled = list(set([func(x) for x in self.url_list]))
-
-        for i in data_list_deled:
-            self.url_list
 
 
     def get_url_list(self):
