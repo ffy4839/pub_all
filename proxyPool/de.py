@@ -1,25 +1,23 @@
+import os
+from bin.func import *
 
-from run import *
-
-
-def get_time(st = '%Y-%m-%d %H:%M:%S'):
-    return time.strftime(st,time.localtime(time.time()))
-
-def write_data(data, mode='a'):
-    if isinstance(data,str):
-        data = [data]
-    for i in data:
-        with open(PATH, mode) as f:
-            f.write(i + '\n')
-
-def read_all(mode='r'):
-    with open(PATH, mode) as f:
+def read_alls(mode='r'):
+    with open(path, mode) as f:
         if f.readable():
             return f.read().strip('\n')
 
+def write_datas(data, mode='a'):
+    if isinstance(data,str):
+        data = [data]
+    for i in data:
+        with open(path, mode) as f:
+            f.write(i + '\n')
+# os.path.dirname(os.getcwd())
+path = os.getcwd() + os.path.sep + 'docs'+ os.path.sep +'proxyPool.txt'
+print(path)
 def del_removel(data=None,reverse=True):
     if not data:
-        data = read_all()
+        data = read_alls()
         data_list = list(set(data.strip('\n').split('\n')))
     elif isinstance(data,str):
         data_list = list(set(data.strip('\n').split('\n')))
@@ -42,26 +40,12 @@ def del_removel(data=None,reverse=True):
     func = lambda x:int(x)
     s = list(save_data.keys())
     s.sort(key=func,reverse=True)
-    write_data('',mode='w')
+    write_datas('',mode='w')
     for i in s:
-        write_data(save_data[i])
+        write_datas(save_data[i])
 
-# def del_removel_check():
-#     # str2list
-#     data = read_all()
-#     if isinstance(data, str):
-#         data = data.strip('\n').split('\n')
-#     # 根据nums排序
-#     func = lambda x: int(x.split(';')[0])
-#     data.sort(key=func, reverse=True)
-#     # 去重
-#     data = list(set(data))
-#     data_ip = [i.split(';')[1] for i in data]
-#     nums = [data_ip.index(i) for i in list(set(data_ip))]
-#     data = [data[i] for i in nums]
-#     # 根据nums排序
-#     data.sort(key=func, reverse=True)
-#     return data
+
+
 
 if __name__ == '__main__':
-    print(get_time())
+    a = del_removel()

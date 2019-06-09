@@ -162,6 +162,6 @@ if __name__ == '__main__':
     get_proxy_save.run()
 
 
-    check = ProxyCheck()
-    check.run()
+    # check = ProxyCheck()
+    # check.run()
     # check.run()

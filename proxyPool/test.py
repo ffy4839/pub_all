@@ -1,2 +1,3 @@
 import os
-print(int(10/3))
+a = {}
+print(a['x'])
